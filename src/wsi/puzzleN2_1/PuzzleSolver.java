@@ -4,11 +4,13 @@
  */
 package wsi.puzzleN2_1;
 
+import klesk.math.search.State;
+import klesk.math.search.StateImpl;
+
 /**
  *
  * @author Soltys
  */
-public class PuzzleSolver
+public final class PuzzleSolver
 {
-
 }

@@ -1,12 +1,7 @@
-<<<<<<< HEAD
+build/
 build.xml
 manifest.mf
 nbproject/
-=======
 *.class
 
-# Package Files #
-*.jar
-*.war
-*.ear
->>>>>>> 741943ddd55d2218f80dcb904c18c767d917deba
+
