@@ -136,8 +136,36 @@ public final class PuzzleState extends StateImpl {
 
     @Override
     public double computeHeuristicGrade() {
-        setH(0);
-        return 0;
+        double heurystyka = 0;
+        int[] wspolrzedne = new int[2];
+        for (int i = 0; i < n * n; i++) {
+            wspolrzedne = znajdzWspolrzedne(i);
+            heurystyka += Math.abs(wspolrzedne[0] - Math.floor(i / n)) + Math.abs(wspolrzedne[1] - (i % n));
+        }
+
+        setH(heurystyka / 2);
+
+        return heurystyka / 2;
+
+    }
+
+    public int[] znajdzWspolrzedne(int liczba) {
+        int[] tmp = new int[2];
+        boolean isBreak = false;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == liczba) {
+                    tmp[0] = i;
+                    tmp[1] = j;
+                    isBreak = true;
+                    break;
+                }
+                if (isBreak) {
+                    break;
+                }
+            }
+        }
+        return tmp;
     }
 
     @Override
