@@ -4,6 +4,7 @@
  */
 package wsi.puzzleN2_1;
 
+import java.util.Random;
 import klesk.math.search.State;
 import klesk.math.search.StateImpl;
 
@@ -11,33 +12,27 @@ import klesk.math.search.StateImpl;
  *
  * @author Soltys
  */
-public final class PuzzleState extends StateImpl
-{
+public final class PuzzleState extends StateImpl {
 
     private final int n;
     private byte[][] board;
     private final PuzzlePrinter printer;
 
-    public PuzzleState(State parent, byte[][] board)
-    {
+    public PuzzleState(State parent, byte[][] board) {
         super(parent);
         this.n = board.length;
         this.board = new byte[n][n];
-        for (int row = 0; row < n; row++)
-        {
+        for (int row = 0; row < n; row++) {
             System.arraycopy(board[row], 0, this.board[row], 0, n);
         }
         printer = new PuzzlePrinter(board.length);
         computeHeuristicGrade();
     }
 
-    public PuzzleState(State parent)
-    {
-
+    public PuzzleState(State parent) {
         super(parent);
 
-        if (parent == null)
-        {
+        if (parent == null) {
             throw new NullPointerException();
         }
 
@@ -45,65 +40,135 @@ public final class PuzzleState extends StateImpl
 
         this.n = puzzleState.getN();
         this.board = new byte[n][n];
-        for (int row = 0; row < n; row++)
-        {
+        for (int row = 0; row < n; row++) {
             System.arraycopy(puzzleState.getBoard()[row], 0, this.board[row], 0, n);
         }
 
         printer = new PuzzlePrinter(board.length);
     }
 
-    public int getN()
-    {
+    public int getN() {
         return n;
     }
 
-    public byte[][] getBoard()
-    {
+    public byte[][] getBoard() {
         return board;
     }
 
+    public class Position {
+
+        public int row;
+        public int column;
+    }
+
+    private Position getEmptySpotPosition() {
+        for (int row = 0; row < board.length; row++) {
+            for (int column = 0; column < board.length; column++) {
+                if (board[row][column] == 0) {
+                    Position pos = new Position();
+                    pos.row = row;
+                    pos.column = column;
+                    return pos;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void safeExchange(int startRow, int startColumn, int endRow, int endColumn) {
+        byte tmp = board[startRow][startColumn];
+        if (endRow < 0 || endColumn < 0
+                || endRow >= board.length || endColumn >= board.length) {
+            return;
+        }
+        board[startRow][startColumn] = board[endRow][endColumn];
+        board[endRow][endColumn] = tmp;
+    }
+
+    public void MoveUp() {
+        Position emptySpotPosition = getEmptySpotPosition();
+        safeExchange(emptySpotPosition.row, emptySpotPosition.column,
+                emptySpotPosition.row - 1, emptySpotPosition.column);
+    }
+
+    public void MoveDown() {
+        Position emptySpotPosition = getEmptySpotPosition();
+        safeExchange(emptySpotPosition.row, emptySpotPosition.column,
+                emptySpotPosition.row + 1, emptySpotPosition.column);
+    }
+
+    public void MoveLeft() {
+        Position emptySpotPosition = getEmptySpotPosition();
+        safeExchange(emptySpotPosition.row, emptySpotPosition.column,
+                emptySpotPosition.row, emptySpotPosition.column - 1);
+    }
+
+    public void MoveRight() {
+        Position emptySpotPosition = getEmptySpotPosition();
+        safeExchange(emptySpotPosition.row, emptySpotPosition.column,
+                emptySpotPosition.row, emptySpotPosition.column + 1);
+    }
+
+    public void Randomize() {
+        Randomize(1000);
+    }
+
+    public void Randomize(int factor) {
+        Random generator = new Random();
+        for (int i = 0; i < 1000; i++) {
+            int value = generator.nextInt(4);
+            switch (value) {
+                case 0:
+                    MoveUp();
+                    break;
+                case 1:
+                    MoveDown();
+                    break;
+                case 2:
+                    MoveLeft();
+                    break;
+                case 3:
+                    MoveRight();
+                    break;
+            }
+        }
+    }
+
     @Override
-    public double computeHeuristicGrade()
-    {
+    public double computeHeuristicGrade() {
         setH(0);
         return 0;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return printer.printSudoku(board);
     }
 
     @Override
-    public String getHashCode()
-    {
+    public String getHashCode() {
         return printer.printSudoku(board);
     }
 
     @Override
-    public boolean isValid()
-    {
+    public boolean isValid() {
         return true;
     }
 
     @Override
-    public boolean isSolved()
-    {
+    public boolean isSolved() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public static void main(String[] params)
-    {
+    public static void main(String[] params) {
         byte[][] board = new byte[3][3];
 
-        board[0][0] = 0;
-        board[0][1] = 1;
-        board[0][2] = 2;
+        board[0][0] = 1;
+        board[0][1] = 2;
+        board[0][2] = 3;
 
-        board[1][0] = 3;
-        board[1][1] = 4;
+        board[1][0] = 4;
+        board[1][1] = 0;
         board[1][2] = 5;
 
         board[2][0] = 6;
@@ -113,7 +178,7 @@ public final class PuzzleState extends StateImpl
         PuzzleState state = new PuzzleState(null, board);
 
         System.out.println(state);
-
-
+        state.Randomize();
+        System.out.println(state);
     }
 }

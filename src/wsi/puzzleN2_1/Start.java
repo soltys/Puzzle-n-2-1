@@ -8,7 +8,7 @@ package wsi.puzzleN2_1;
  *
  * @author Soltys
  */
-public class Puzzle_n2_1
+public class Start
 {
 
     /**
