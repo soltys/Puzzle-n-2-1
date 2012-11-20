@@ -18,14 +18,17 @@ public final class PuzzleState extends StateImpl {
     private byte[][] board;
     private final PuzzlePrinter printer;
 
-    public PuzzleState(State parent, byte[][] board) {
+    public PuzzleState(State parent, int n) {
         super(parent);
-        this.n = board.length;
+        this.n = n;
         this.board = new byte[n][n];
-        for (int row = 0; row < n; row++) {
-            System.arraycopy(board[row], 0, this.board[row], 0, n);
+        for (int index = 0; index < n * n; index++) {
+            int row = index / n;
+            int column = index % n;
+            board[row][column] = (byte) index;
         }
         printer = new PuzzlePrinter(board.length);
+        setG(1);
         computeHeuristicGrade();
     }
 
@@ -43,7 +46,7 @@ public final class PuzzleState extends StateImpl {
         for (int row = 0; row < n; row++) {
             System.arraycopy(puzzleState.getBoard()[row], 0, this.board[row], 0, n);
         }
-
+        setG(puzzleState.getG() + 1);
         printer = new PuzzlePrinter(board.length);
     }
 
@@ -132,40 +135,35 @@ public final class PuzzleState extends StateImpl {
                     break;
             }
         }
+        computeHeuristicGrade();
     }
 
     @Override
     public double computeHeuristicGrade() {
         double heurystyka = 0;
-        int[] wspolrzedne = new int[2];
+
         for (int i = 0; i < n * n; i++) {
-            wspolrzedne = znajdzWspolrzedne(i);
-            heurystyka += Math.abs(wspolrzedne[0] - Math.floor(i / n)) + Math.abs(wspolrzedne[1] - (i % n));
+            Position position = findNumberPosition(i);
+            heurystyka += Math.abs(position.row - Math.floor(i / n)) + Math.abs(position.column - (i % n));
         }
 
         setH(heurystyka / 2);
 
         return heurystyka / 2;
-
     }
 
-    public int[] znajdzWspolrzedne(int liczba) {
-        int[] tmp = new int[2];
-        boolean isBreak = false;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (board[i][j] == liczba) {
-                    tmp[0] = i;
-                    tmp[1] = j;
-                    isBreak = true;
-                    break;
-                }
-                if (isBreak) {
-                    break;
+    public Position findNumberPosition(int number) {
+        Position position = new Position();
+        for (int row = 0; row < n; row++) {
+            for (int column = 0; column < n; column++) {
+                if (board[row][column] == number) {
+                    position.row = row;
+                    position.column = column;
+                    return position;
                 }
             }
         }
-        return tmp;
+        return position;
     }
 
     @Override
@@ -189,21 +187,9 @@ public final class PuzzleState extends StateImpl {
     }
 
     public static void main(String[] params) {
-        byte[][] board = new byte[3][3];
 
-        board[0][0] = 1;
-        board[0][1] = 2;
-        board[0][2] = 3;
 
-        board[1][0] = 4;
-        board[1][1] = 0;
-        board[1][2] = 5;
-
-        board[2][0] = 6;
-        board[2][1] = 7;
-        board[2][2] = 8;
-
-        PuzzleState state = new PuzzleState(null, board);
+        PuzzleState state = new PuzzleState(null, 3);
 
         System.out.println(state);
         state.Randomize();
