@@ -27,22 +27,27 @@ public final class PuzzleSolver extends klesk.math.search.AStarSearcher {
         List<State> children = new ArrayList<State>();
         for (int index = 0; index < 4; index++) {
             PuzzleState childState = new PuzzleState(parent);
+            boolean changed = false;
             switch (index) {
                 case 0:
-                    childState.MoveUp();
+                   changed= childState.MoveUp();
                     break;
                 case 1:
-                    childState.MoveDown();
+                   changed= childState.MoveDown();
                     break;
                 case 2:
-                    childState.MoveLeft();
+                    changed=childState.MoveLeft();
                     break;
                 case 3:
-                    childState.MoveRight();
+                    changed=childState.MoveRight();
                     break;
             }
+            if(changed)
+            {
             childState.computeHeuristicGrade();
-            children.add(childState);
+            children.add(childState);    
+            }
+            
         }
         parent.setChildren(children);
     }
@@ -58,10 +63,15 @@ public final class PuzzleSolver extends klesk.math.search.AStarSearcher {
 
         PuzzleState puzzle = new PuzzleState(null, 3);
         System.out.println(puzzle);
-        puzzle.Randomize();
+        
+        puzzle.Randomize(5);
+        puzzle.computeHeuristicGrade();
+        System.out.println(puzzle.getH());
         System.out.println(puzzle);
         PuzzleSolver solver = new PuzzleSolver(puzzle, true, true);
+        System.out.println("Started searching");
         solver.doSearch();
+        System.out.println("Stoped searching");
         PuzzleState temp = (PuzzleState) solver.getSolutions().get(0);
         List<PuzzleState> steps = new ArrayList<PuzzleState>();
 
