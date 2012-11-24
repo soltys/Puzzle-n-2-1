@@ -17,6 +17,7 @@ public final class PuzzleState extends StateImpl {
     private final int n;
     private byte[][] board;
     private final PuzzlePrinter printer;
+    public static IHeuristic ChosenHeuristic = PuzzleHeuristic.getInstance().manhattanDistance;
 
     public PuzzleState(State parent, int n) {
         super(parent);
@@ -58,24 +59,20 @@ public final class PuzzleState extends StateImpl {
         return board;
     }
 
+    @Override
+    public boolean isValid() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isSolved() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public class Position {
 
         public int row;
         public int column;
-    }
-
-    private Position getEmptySpotPosition() {
-        for (int row = 0; row < board.length; row++) {
-            for (int column = 0; column < board.length; column++) {
-                if (board[row][column] == 0) {
-                    Position pos = new Position();
-                    pos.row = row;
-                    pos.column = column;
-                    return pos;
-                }
-            }
-        }
-        return null;
     }
 
     private boolean safeExchange(int startRow, int startColumn, int endRow, int endColumn) {
@@ -90,25 +87,25 @@ public final class PuzzleState extends StateImpl {
     }
 
     public boolean MoveUp() {
-        Position emptySpotPosition = getEmptySpotPosition();
+        Position emptySpotPosition = findNumberPosition(0);
         return safeExchange(emptySpotPosition.row, emptySpotPosition.column,
                 emptySpotPosition.row - 1, emptySpotPosition.column);
     }
 
     public boolean MoveDown() {
-        Position emptySpotPosition = getEmptySpotPosition();
+        Position emptySpotPosition = findNumberPosition(0);
         return safeExchange(emptySpotPosition.row, emptySpotPosition.column,
                 emptySpotPosition.row + 1, emptySpotPosition.column);
     }
 
     public boolean MoveLeft() {
-        Position emptySpotPosition = getEmptySpotPosition();
+        Position emptySpotPosition = findNumberPosition(0);
         return safeExchange(emptySpotPosition.row, emptySpotPosition.column,
                 emptySpotPosition.row, emptySpotPosition.column - 1);
     }
 
     public boolean MoveRight() {
-        Position emptySpotPosition = getEmptySpotPosition();
+        Position emptySpotPosition = findNumberPosition(0);
         return safeExchange(emptySpotPosition.row, emptySpotPosition.column,
                 emptySpotPosition.row, emptySpotPosition.column + 1);
     }
@@ -119,38 +116,32 @@ public final class PuzzleState extends StateImpl {
 
     public void Randomize(int factor) {
         Random generator = new Random();
-        for (int i = 0; i < 1000; i++) {
+        int movesNumber = factor;
+        while (movesNumber > 0) {
             int value = generator.nextInt(4);
-            switch (value) {
-                case 0:
-                    MoveUp();
-                    break;
-                case 1:
-                    MoveDown();
-                    break;
-                case 2:
-                    MoveLeft();
-                    break;
-                case 3:
-                    MoveRight();
-                    break;
+            if (makeMove(value)) {
+                movesNumber--;
             }
         }
         computeHeuristicGrade();
     }
 
+    private boolean makeMove(int value) {
+        switch (value) {
+            case 0:
+                return MoveUp();
+            case 1:
+                return MoveDown();
+            case 2:
+                return MoveLeft();
+            default:
+                return MoveRight();
+        }
+    }
+
     @Override
     public double computeHeuristicGrade() {
-        double heuristic = 0;        
-        for (int i = 0; i < board.length * board.length; i++) {            
-            int row = i/n;
-            int column = i % n;
-            if (board[row][column]!=0) {
-                if (board[row][column] != i) {
-                    heuristic++;
-                }
-            }
-        }
+        double heuristic = ChosenHeuristic.computeHeuristic(board);
         setH(heuristic);
         return heuristic;
     }
@@ -180,19 +171,8 @@ public final class PuzzleState extends StateImpl {
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public boolean isAdmissible() {
         return true;
-    }
-    
-
-    @Override
-    public boolean isSolved() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public static void main(String[] params) {
